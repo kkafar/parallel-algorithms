@@ -9,5 +9,5 @@
 # As in quickstart
 module load scipy-bundle/2021.10-intel-2021b
 export SLURM_OVERLAP=1
-mpiexec ./main.py 2048
+mpiexec ./main.py 10 13 255 30
 
