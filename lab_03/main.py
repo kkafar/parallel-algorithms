@@ -4,77 +4,71 @@ import sys
 import numpy as np
 from mpi4py import MPI
 
+class Args:
+    def __init__(self):
+        assert len(sys.argv) == 5
+        # Points per process
+        self.ppc: int = sys.argv[1]
+        # Membrane side length
+        self.a: float = sys.argv[2]
+        self.theta: float = sys.argv[3]
+        # Iteration count of the Jacobi method
+        self.iters: int = sys.argv[4]
 
-def compute(comm, proc_rank, n_proc, delta, ppc, theta, steps):
+def compute(comm, rank, size, delta, ppc, theta, iters):
     """
-    :param comm: MPI global communicator
-    :param proc_rank: rank of current process
-    :param n_proc: total number of processes
-    :param delta: ?
-    :param ppc: points per process
-    :theta: ?
-    :steps: ?
+    :param delta: resolution of the grid
     """
 
-    side = proc_rank * ppc
-    stride = np.zeros((ppc, side))
+    side = rank * ppc
+    # Rectangle this process is responsible for
+    H = np.zeros((ppc, side))
 
-    x_min = 0 if proc_rank > 0 else 1
-    x_max = ppc
+    x_min = 0 if rank > 0 else 1
+    x_max = ppc if rank < size - 1 else ppc - 1
 
-    if proc_rank >= n_proc:
-        x_max -= 1
+    for i in range(iters):
+        H_i = np.zeros((ppc, side), dtype=np.float64)
+        if i > 0:
+            # We receive values from last iteration from our neighs
+            recv_buff = np.empty(side, dtype=np.float64)
+            if rank > 0:
+                comm.Recv(recv_buff, rank - 1, i - 1)
+                H_i[0] += recv_buff
+            if rank < size - 1:
+                comm.Recv(recv_buff, rank + 1, i - 1)
+                H_i[-1] += recv_buff
 
-    for s in range(steps):
-        new_stride = np.zeros((ppc, side), dtype=np.float64)
-        if s > 0:
-            if proc_rank > 0:
-                recv_buff = np.empty(side, dtype=np.float64)
-                comm.Recv(recv_buff, proc_rank - 1, s - 1)
-                new_stride[0] += recv_buff
-            if proc_rank < n_proc - 1:
-                recv_buff = np.empty(side, dtype=np.float64)
-                comm.Recv(recv_buff, proc_rank + 1, s - 1)
-                new_stride[-1] += recv_buff
+        # We apply the formula
+        H_i[x_min: x_max, 1: side - 1] -= delta ** 2 * theta
+        H_i[x_min:x_max, 1: side - 1] += H[x_min:x_max, 0: side - 2]
+        H_i[x_min:x_max, 1: side - 1] += H[x_min:x_max, 2:side]
+        H_i[1:x_max, :] += H[0: x_max - 1, :]
+        H_i[x_min: ppc - 1, :] += H[x_min + 1: ppc, :]
 
-        new_stride[x_min: x_max, 1: side - 1] -= delta ** 2 * theta
-        new_stride[x_min:x_max, 1: side - 1] += stride[x_min:x_max, 0: side - 2]
-        new_stride[x_min:x_max, 1: side - 1] += stride[x_min:x_max, 2:side]
-        new_stride[1:x_max, :] += stride[0: x_max - 1, :]
-        new_stride[x_min: ppc - 1, :] += stride[x_min + 1: ppc, :]
+        H_i /= 4
+        H = H_i
 
-        new_stride /= 4
-        stride = new_stride
+        if rank > 0:
+            comm.Isend(H[0].copy(), rank - 1, i)
 
-        if proc_rank > 0:
-            comm.Isend(stride[0].copy(), proc_rank - 1, s)
+        if rank < size - 1:
+            comm.Isend(H[-1].copy(), rank + 1, i)
 
-        if proc_rank < n_proc - 1:
-            comm.Isend(stride[-1].copy(), proc_rank + 1, s)
+    return H
 
-    return stride
-
-
-# def main():
-#     pass
-
-if __name__ == "__main__":
-    _, ppc, a, theta, steps = sys.argv
-    ppc = int(ppc)
-    a = float(a)
-    theta = float(theta)
-    steps = int(steps)
-
+def main():
+    args = Args()
     comm = MPI.COMM_WORLD
-    proc_rank = comm.Get_rank()
-    n_proc = comm.Get_size()
+    rank = comm.Get_rank()
+    size = comm.Get_size()
 
-    delta = a / (ppc * n_proc - 1)
-    stride = compute(comm, proc_rank, n_proc, delta, ppc, theta, steps)
-
+    delta = args.a / (args.ppc * size - 1)
+    stride = compute(comm, rank, size, delta, args.ppc, args.theta, args.iters)
     recv_buff = comm.gather(stride, root=0)
-    if proc_rank == 0:
+    if rank == 0:
         recv_buff = np.concatenate(recv_buff, axis=0)
         np.savetxt(sys.stdout.buffer, recv_buff)
 
-
+if __name__ == "__main__":
+    main()
