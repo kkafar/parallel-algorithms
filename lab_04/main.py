@@ -62,10 +62,10 @@ def compute(comm, rank, size, delta, ppc, theta, iters):
         H = H_i
 
         if rank > 0:
-            comm.Isend(H[0].copy(), rank - 1, i)
+            comm.Send(H[0].copy(), rank - 1, i)
 
         if rank < size - 1:
-            comm.Isend(H[-1].copy(), rank + 1, i)
+            comm.Send(H[-1].copy(), rank + 1, i)
 
     return H
 
