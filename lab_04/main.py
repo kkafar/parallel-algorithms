@@ -32,6 +32,7 @@ def compute(comm, rank, size, delta, ppc, theta, iters):
     """
 
     side = rank * ppc
+    print(f'rank {rank} ppc {ppc} side {side}')
     # Rectangle this process is responsible for
     H = np.zeros((ppc, side))
 
@@ -43,11 +44,11 @@ def compute(comm, rank, size, delta, ppc, theta, iters):
         if i > 0:
             # We receive values from last iteration from our neighs
             if rank > 0:
-                recv_buff = np.empty(side, dtype=np.float64)
+                recv_buff = np.zeros(side, dtype=np.float64)
                 comm.Recv(recv_buff, rank - 1, i - 1)
                 H_i[0] += recv_buff
             if rank < size - 1:
-                recv_buff = np.empty(side, dtype=np.float64)
+                recv_buff = np.zeros(side, dtype=np.float64)
                 comm.Recv(recv_buff, rank + 1, i - 1)
                 H_i[-1] += recv_buff
 
@@ -62,10 +63,10 @@ def compute(comm, rank, size, delta, ppc, theta, iters):
         H = H_i
 
         if rank > 0:
-            comm.Send(H[0].copy(), rank - 1, i)
+            comm.Isend(H[0].copy(), rank - 1, i)
 
         if rank < size - 1:
-            comm.Send(H[-1].copy(), rank + 1, i)
+            comm.Isend(H[-1].copy(), rank + 1, i)
 
     return H
 
@@ -76,6 +77,7 @@ def main():
     rank = comm.Get_rank()
     size = comm.Get_size()
 
+    print(f'rank {rank} args {args} size {size}')
     # Hey, I'm not counting in argument parsing as sequential part of the program,
     # as it could be completely avoided and is done only for convenience
     start_time = timer()
