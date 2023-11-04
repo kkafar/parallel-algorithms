@@ -42,11 +42,12 @@ def compute(comm, rank, size, delta, ppc, theta, iters):
         H_i = np.zeros((ppc, side), dtype=np.float64)
         if i > 0:
             # We receive values from last iteration from our neighs
-            recv_buff = np.empty(side, dtype=np.float64)
             if rank > 0:
+                recv_buff = np.empty(side, dtype=np.float64)
                 comm.Recv(recv_buff, rank - 1, i - 1)
                 H_i[0] += recv_buff
             if rank < size - 1:
+                recv_buff = np.empty(side, dtype=np.float64)
                 comm.Recv(recv_buff, rank + 1, i - 1)
                 H_i[-1] += recv_buff
 
