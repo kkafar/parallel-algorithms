@@ -23,7 +23,9 @@ theta=128
 iters=64
 csv_header="process_count,problem_size,series_id,time"
 output_dir="${SCRATCH}/ar"
-output_file="${output_dir}/$(date +%Y%m%dT%H%M%S)"
+output_file_base="${output_dir}/$(date +%Y%m%dT%H%M%S)"
+output_file="${output_dir}/$(date +%Y%m%dT%H%M%S).csv"
+
 
 mkdir -p $output_dir
 echo $csv_header > $output_file
@@ -42,7 +44,7 @@ for (( n_cpu = $cpu_min_count ; n_cpu <= $cpu_max_count ; n_cpu++ )); do
   done
 done
 
-zip -q "${output_file}.zip" $output_file
+zip -q "${output_file_base}.zip" $output_file
 # rm -f $output_file
 
 # mpiexec ./main.py 10 13 255 30
