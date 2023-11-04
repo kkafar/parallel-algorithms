@@ -37,8 +37,7 @@ for (( n_cpu = $cpu_min_count ; n_cpu <= $cpu_max_count ; n_cpu++ )); do
       echo "Run: mpiexec -np $n_cpu ./main.py --series $series_id --side $side_length --theta $theta --iters 64 --points-per-proc $problem_size >> $output_file"
       # mpiexec -np $n_cpu ./main.py --series $series_id --side $side_length --theta $theta --iters 64 --points-per-proc $problem_size >> $output_file
       completed_task=$(( $completed_task + 1 ))
-      percentage_completed=$(( $completed_task / $total_task * 100 ))
-      echo "Completion: ${percentage_completed}%"
+      echo "Completion: $completed_task / $total_task"
     done
   done
 done
