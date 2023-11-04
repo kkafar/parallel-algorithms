@@ -23,7 +23,7 @@ theta=128
 iters=64
 csv_header="process_count,problem_size,series_id,time"
 output_dir="${SCRATCH}/ar"
-output_file="${output_dir}/ar/$(date +%Y-%m-%dT%H:%M:%S)"
+output_file="${output_dir}/$(date +%Y-%m-%dT%H:%M:%S)"
 
 mkdir -p $output_dir
 echo $csv_header > $output_file
