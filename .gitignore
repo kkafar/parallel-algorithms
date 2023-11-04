@@ -2,3 +2,5 @@
 .venv/
 .envrc
 software/
+*.pdf
+*.png
