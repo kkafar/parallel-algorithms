@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 #SBATCH --account=plgar2023-cpu
-#SBATCH --time=00:01:00
+#SBATCH --time=02:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --partition=plgrid
@@ -28,11 +28,17 @@ output_file="${output_dir}/$(date +%Y%m%dT%H%M%S)"
 mkdir -p $output_dir
 echo $csv_header > $output_file
 
+total_task=$(( "${#problem_sizes[@]}" * (cpu_max_count - cpu_min_count + 1) * series_count ))
+completed_task=0
+
 for (( n_cpu = $cpu_min_count ; n_cpu <= $cpu_max_count ; n_cpu++ )); do
   for problem_size in "${problem_sizes[@]}"; do
     for (( series_id = 0 ; series_id < $series_count ; series_id++ )); do
-      echo "Would run: mpiexec -np $n_cpu ./main.py --series $series_id --side $side_length --theta $theta --iters 64 --points-per-proc $problem_size >> $output_file"
+      echo "Run: mpiexec -np $n_cpu ./main.py --series $series_id --side $side_length --theta $theta --iters 64 --points-per-proc $problem_size >> $output_file"
       # mpiexec -np $n_cpu ./main.py --series $series_id --side $side_length --theta $theta --iters 64 --points-per-proc $problem_size >> $output_file
+      completed_task=$(( $completed_task + 1 ))
+      percentage_completed=$(( $completed_task / $total_task * 100 ))
+      echo "Completion: ${percentage_completed}%"
     done
   done
 done
