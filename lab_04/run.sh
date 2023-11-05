@@ -14,8 +14,8 @@ module load scipy-bundle/2021.10-intel-2021b
 # I do not think we want the tasks to share resources
 # export SLURM_OVERLAP=1
 
-problem_sizes=(256 512 1024)
-side_length=1024
+problem_sizes=(1024 2048 4096)
+side_length=4096
 cpu_min_count=1
 cpu_max_count=16
 series_count=5
@@ -25,7 +25,6 @@ csv_header="process_count,problem_size,series_id,time"
 output_dir="${SCRATCH}/ar"
 output_file_base="${output_dir}/$(date +%Y%m%dT%H%M%S)"
 output_file="${output_dir}/$(date +%Y%m%dT%H%M%S).csv"
-
 
 mkdir -p $output_dir
 echo $csv_header > $output_file
