@@ -101,8 +101,11 @@ def main():
     # compute_time = timer() - compute_time
 
     # gather_time = timer()
-    recv_buff = np.empty((args.grid_points, args.grid_points), dtype=np.float64)
-    comm.Gather(stripe, recv_buff, root=0)
+
+    # recv_buff = np.empty((args.grid_points, args.grid_points), dtype=np.float64)
+    # comm.Gather(stripe, recv_buff, root=0)
+
+    recv_buff = comm.gather(stripe, root=0)
     # gather_time = timer() - gather_time
 
     if rank == 0:
