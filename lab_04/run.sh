@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 #SBATCH --account=plgar2023-cpu
-#SBATCH --time=02:00:00
+#SBATCH --time=04:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --partition=plgrid
