@@ -4,3 +4,5 @@
 software/
 *.pdf
 *.png
+*.txt
+*.csv
