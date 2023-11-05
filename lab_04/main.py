@@ -82,8 +82,9 @@ def main():
     # as it could be completely avoided and is done only for convenience
     start_time = timer()
     delta = args.a / (args.ppc * size - 1)
-    stride = compute(comm, rank, size, delta, args.ppc, args.theta, args.iters)
-    recv_buff = comm.Gather(stride, root=0)
+    stripe = compute(comm, rank, size, delta, args.ppc, args.theta, args.iters)
+    recv_buff = np.empty((args.ppc * size, args.ppc * size), dtype=np.float64)
+    comm.Gather(stripe, recv_buff, root=0)
     if rank == 0:
         assert len(recv_buff) > 0
         # recv_buff = np.concatenate(recv_buff, axis=0)

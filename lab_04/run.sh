@@ -6,7 +6,7 @@
 #SBATCH --ntasks=1
 #SBATCH --partition=plgrid
 #SBATCH --cpus-per-task=16
-#SBATCH --mem-per-cpu=384M
+#SBATCH --mem-per-cpu=512M
 
 module purge
 module load scipy-bundle/2021.10-intel-2021b
