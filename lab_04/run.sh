@@ -14,7 +14,7 @@ module load scipy-bundle/2021.10-intel-2021b
 # I do not think we want the tasks to share resources
 # export SLURM_OVERLAP=1
 
-problem_sizes=(1024 2048 4096)
+problem_sizes=(256 384 512)
 side_length=4096
 cpu_min_count=1
 cpu_max_count=16
