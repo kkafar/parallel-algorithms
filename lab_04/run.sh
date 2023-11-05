@@ -5,7 +5,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --partition=plgrid
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=24
 #SBATCH --mem-per-cpu=512M
 
 module purge
