@@ -32,9 +32,11 @@ def compute(comm, rank, size, delta, ppc, theta, iters):
     """
 
     side = size * ppc
-    # print(f'rank {rank} ppc {ppc} side {side}')
+
     # Rectangle this process is responsible for
-    H = np.zeros((ppc, side))
+    H = np.zeros((ppc, side), dtype=np.float64)
+    # H_i = np.zeros((ppc, side), dtype=np.float64)
+    recv_buff = np.empty(side, dtype=np.float64)
 
     x_min = 0 if rank > 0 else 1
     x_max = ppc if rank < size - 1 else ppc - 1
@@ -42,7 +44,6 @@ def compute(comm, rank, size, delta, ppc, theta, iters):
     for i in range(iters):
         H_i = np.zeros((ppc, side), dtype=np.float64)
         if i > 0:
-            recv_buff = np.zeros(side, dtype=np.float64)
             # We receive values from last iteration from our neighs
             if rank > 0:
                 comm.Recv(recv_buff, rank - 1, i - 1)
@@ -53,18 +54,17 @@ def compute(comm, rank, size, delta, ppc, theta, iters):
                 H_i[-1] += recv_buff
 
         # We apply the formula
-        H_i[x_min: x_max, 1: side - 1] -= delta ** 2 * theta
-        H_i[x_min:x_max, 1: side - 1] += H[x_min:x_max, 0: side - 2]
-        H_i[x_min:x_max, 1: side - 1] += H[x_min:x_max, 2:side]
-        H_i[1:x_max, :] += H[0: x_max - 1, :]
-        H_i[x_min: ppc - 1, :] += H[x_min + 1: ppc, :]
+        H_i[x_min : x_max, 1 : side - 1] -= delta ** 2 * theta
+        H_i[x_min : x_max, 1 : side - 1] += H[x_min : x_max, 0 : side - 2]
+        H_i[x_min : x_max, 1 : side - 1] += H[x_min : x_max, 2 : side]
+        H_i[1 : x_max, :] += H[0 : x_max - 1, :]
+        H_i[x_min : ppc - 1, :] += H[x_min + 1 : ppc, :]
 
         H_i /= 4
         H = H_i
 
         if rank > 0:
             comm.Isend(H[0].copy(), rank - 1, i)
-
         if rank < size - 1:
             comm.Isend(H[-1].copy(), rank + 1, i)
 
@@ -83,9 +83,10 @@ def main():
     start_time = timer()
     delta = args.a / (args.ppc * size - 1)
     stride = compute(comm, rank, size, delta, args.ppc, args.theta, args.iters)
-    recv_buff = comm.gather(stride, root=0)
+    recv_buff = comm.Gather(stride, root=0)
     if rank == 0:
-        recv_buff = np.concatenate(recv_buff, axis=0)
+        assert len(recv_buff) > 0
+        # recv_buff = np.concatenate(recv_buff, axis=0)
         elapsed = timer() - start_time  # Result is in seconds, we want to convert it to milis
         # "process_count,problem_size,series_id,time"
         print(f'{size},{args.ppc},{args.series},{elapsed * 1000}')

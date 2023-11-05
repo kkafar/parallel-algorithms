@@ -5,7 +5,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --partition=plgrid
-#SBATCH --cpus-per-task=24
+#SBATCH --cpus-per-task=16
 #SBATCH --mem-per-cpu=384M
 
 module purge
@@ -16,9 +16,9 @@ module add .plgrid plgrid/tools/openmpi
 # export SLURM_OVERLAP=1
 
 problem_sizes=(256 512 1024)
-side_length=256
+side_length=1024
 cpu_min_count=1
-cpu_max_count=24
+cpu_max_count=16
 series_count=5
 theta=128
 iters=64
