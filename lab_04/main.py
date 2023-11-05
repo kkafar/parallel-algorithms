@@ -111,7 +111,7 @@ def main():
         elapsed = timer() - start_time  # Result is in seconds, we want to convert it to milis
         # "process_count,problem_size,series_id,time,compute_time,gather_time"
         # print(f'{size},{args.ppc},{args.series},{elapsed * 1000},{compute_time * 1000},{gather_time * 1000}')
-        print(f'{size},{args.ppc},{args.series},{elapsed * 1000}')
+        print(f'{size},{args.grid_points},{args.series},{elapsed * 1000}')
 
 
 if __name__ == "__main__":
