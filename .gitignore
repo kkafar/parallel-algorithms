@@ -4,3 +4,8 @@
 software/
 *.pdf
 *.png
+*.txt
+*.csv
+!CMakeLists.txt
+build/
+.cache/
