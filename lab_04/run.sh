@@ -36,10 +36,10 @@ completed_task=0
 for (( n_cpu = $cpu_min_count ; n_cpu <= $cpu_max_count ; n_cpu++ )); do
   for problem_size in "${problem_sizes[@]}"; do
     for (( series_id = 0 ; series_id < $series_count ; series_id++ )); do
-      echo "Run: mpiexec -np $n_cpu ./main.py --series $series_id --side $side_length --theta $theta --iters 64 --points-per-proc $problem_size >> $output_file"
+      echo "[$(date +%Y%m%dT%H%M%S)] Run: mpiexec -np $n_cpu ./main.py --series $series_id --side $side_length --theta $theta --iters 64 --points-per-proc $problem_size >> $output_file"
       mpiexec -np $n_cpu ./main.py --series $series_id --side $side_length --theta $theta --iters 64 --points-per-proc $problem_size >> $output_file
       completed_task=$(( $completed_task + 1 ))
-      echo "Completion: $completed_task / $total_task"
+      echo "[$(date +%Y%m%dT%H%M%S)] Completion: $completed_task / $total_task"
     done
   done
 done
