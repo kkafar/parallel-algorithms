@@ -1,5 +1,4 @@
 #!/bin/bash -l
-
 #SBATCH --account=plgar2023-cpu
 #SBATCH --time=04:00:00
 #SBATCH --nodes=1
@@ -10,7 +9,7 @@
 
 module purge
 module load scipy-bundle/2021.10-intel-2021b
-module add .plgrid plgrid/tools/openmpi
+# module add .plgrid plgrid/tools/openmpi
 
 # I do not think we want the tasks to share resources
 # export SLURM_OVERLAP=1
