@@ -19,6 +19,8 @@ COL_EFFECTIVENES_STD = COL_EFFECTIVENES + '_std'
 COL_KF = 'karp_flatt'
 COL_KF_AVG = COL_KF + '_avg'
 COL_KF_STD = COL_KF + '_std'
+COL_COMPUTE_TIME = 'compute_time'
+COL_GATHER_TIME = 'gather_time'
 
 
 @dataclass

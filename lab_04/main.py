@@ -82,15 +82,21 @@ def main():
     # as it could be completely avoided and is done only for convenience
     start_time = timer()
     delta = args.a / (args.ppc * size - 1)
+    compute_time = timer()
     stripe = compute(comm, rank, size, delta, args.ppc, args.theta, args.iters)
+    compute_time = timer() - compute_time
+
+    gather_time = timer()
     recv_buff = np.empty((args.ppc * size, args.ppc * size), dtype=np.float64)
     comm.Gather(stripe, recv_buff, root=0)
+    gather_time = timer() - gather_time
+
     if rank == 0:
         assert len(recv_buff) > 0
         # recv_buff = np.concatenate(recv_buff, axis=0)
         elapsed = timer() - start_time  # Result is in seconds, we want to convert it to milis
-        # "process_count,problem_size,series_id,time"
-        print(f'{size},{args.ppc},{args.series},{elapsed * 1000}')
+        # "process_count,problem_size,series_id,time,compute_time,gather_time"
+        print(f'{size},{args.ppc},{args.series},{elapsed * 1000},{compute_time * 1000},{gather_time * 1000}')
 
 
 if __name__ == "__main__":
