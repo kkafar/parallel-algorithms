@@ -5,8 +5,8 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --partition=plgrid
-#SBATCH --cpus-per-task=36
-#SBATCH --mem-per-cpu=512M
+#SBATCH --cpus-per-task=24
+#SBATCH --mem-per-cpu=384M
 
 module purge
 module load scipy-bundle/2021.10-intel-2021b
@@ -17,7 +17,7 @@ module load scipy-bundle/2021.10-intel-2021b
 problem_sizes=(256 512 1024)
 side_length=256
 cpu_min_count=1
-cpu_max_count=36
+cpu_max_count=24
 series_count=5
 theta=128
 iters=64
