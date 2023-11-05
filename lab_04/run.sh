@@ -14,8 +14,8 @@ module load scipy-bundle/2021.10-intel-2021b
 # I do not think we want the tasks to share resources
 # export SLURM_OVERLAP=1
 
-problem_sizes=(256 384 512)
-side_length=4096
+problem_sizes=(4096 8192 16384)
+side_length=8192
 cpu_min_count=1
 cpu_max_count=16
 series_count=5
@@ -35,8 +35,8 @@ completed_task=0
 for (( n_cpu = $cpu_min_count ; n_cpu <= $cpu_max_count ; n_cpu++ )); do
   for problem_size in "${problem_sizes[@]}"; do
     for (( series_id = 0 ; series_id < $series_count ; series_id++ )); do
-      echo "[$(date +%Y%m%dT%H%M%S)] Run: mpiexec -np $n_cpu ./main.py --series $series_id --side $side_length --theta $theta --iters 64 --points-per-proc $problem_size >> $output_file"
-      mpiexec -np $n_cpu ./main.py --series $series_id --side $side_length --theta $theta --iters 64 --points-per-proc $problem_size >> $output_file
+      echo "[$(date +%Y%m%dT%H%M%S)] Run: mpiexec -np $n_cpu ./main.py --series $series_id --side $side_length --theta $theta --iters 64 --grid-points $problem_size >> $output_file"
+      mpiexec -np $n_cpu ./main.py --series $series_id --side $side_length --theta $theta --iters 64 --grid-points $problem_size >> $output_file
       completed_task=$(( $completed_task + 1 ))
       echo "[$(date +%Y%m%dT%H%M%S)] Completion: $completed_task / $total_task"
     done
