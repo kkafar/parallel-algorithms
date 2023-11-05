@@ -6,3 +6,6 @@ software/
 *.png
 *.txt
 *.csv
+!CMakeLists.txt
+build/
+.cache/
