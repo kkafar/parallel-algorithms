@@ -64,9 +64,10 @@ def main():
     fig, axes = plt.subplots(nrows=2, ncols=2)
     common_plot_args = {'capthick': 1.4, 'linestyle': ''}
     markers = ['.', 'x', '^']
+    colors = 'rgb'
     assert len(markers) == len(problem_sizes)
 
-    for i, problem_size in enumerate(problem_sizes):
+    for i, (problem_size, m, c) in enumerate(zip(problem_sizes, markers, colors)):
         df_per_size = df_main.filter(col(COL_PROBLEM_SIZE) == problem_size)
         df_per_size = (
             df_per_size.lazy()
@@ -97,7 +98,8 @@ def main():
         y_data = df_per_size.get_column(COL_TIME_AVG)
         y_err_data = df_per_size.get_column(COL_TIME_STD)
 
-        ax.errorbar(x_data, y_data, yerr=y_err_data, label=f'Rozmiar: {problem_size}', marker=markers[i], **common_plot_args)
+        ax.errorbar(x_data, y_data, yerr=y_err_data, label=f'Rozmiar: {problem_size}', marker=markers[i], color=c, **common_plot_args)
+        ax.plot(x_data, [single_cpu_times.item(i) / x for x in x_data], label='y = t_0 / x', linestyle='--', color=c)
         # ax.plot(x_data, [single_cpu_times.item(i) / x for x in x_data], linestyle='--')
         ax.set(
             title='Czas wykonania w zależności od liczby procesorów',
@@ -110,7 +112,9 @@ def main():
         ax = axes[0][1]
         y_data = df_per_size[COL_SPEEDUP_AVG]
         y_err_data = df_per_size[COL_SPEEDUP_STD]
-        ax.errorbar(x_data, y_data, yerr=y_err_data, label=f'Rozmiar: {problem_size}', marker=markers[i], **common_plot_args)
+        ax.errorbar(x_data, y_data, yerr=y_err_data, label=f'Rozmiar: {problem_size}', marker=markers[i], color=c, **common_plot_args)
+        if i == 0:
+            ax.plot(x_data, [x for x in x_data], label='y = x', linestyle='--')
         ax.set(
             title='Przyśpieszenie',
             xlabel='Liczba procesorów',
@@ -122,7 +126,9 @@ def main():
         ax = axes[1][0]
         y_data = df_per_size[COL_EFFECTIVENES_AVG]
         y_err_data = df_per_size[COL_EFFECTIVENES_STD]
-        ax.errorbar(x_data, y_data, yerr=y_err_data, label=f'Rozmiar: {problem_size}', marker=markers[i], **common_plot_args)
+        ax.errorbar(x_data, y_data, yerr=y_err_data, label=f'Rozmiar: {problem_size}', marker=markers[i], color=c, **common_plot_args)
+        if i == 0:
+            ax.plot(x_data, [1 for _ in x_data], label='y = 1', linestyle='--')
         ax.set(
             title='Efektywność',
             xlabel='Liczba procesorów',
@@ -134,7 +140,9 @@ def main():
         ax = axes[1][1]
         y_data = df_per_size[COL_KF_AVG]
         y_err_data = df_per_size[COL_KF_STD]
-        ax.errorbar(x_data, y_data, yerr=y_err_data, label=f'Rozmiar: {problem_size}', marker=markers[i], **common_plot_args)
+        ax.errorbar(x_data, y_data, yerr=y_err_data, label=f'Rozmiar: {problem_size}', marker=markers[i], color=c, **common_plot_args)
+        if i == 0:
+            ax.plot(x_data, [0 for _ in x_data], label='y = 0', linestyle='--')
         ax.set(
             title='Metryka Karpa-Flatta',
             xlabel='Liczba procesorów',
