@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --partition=plgrid
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=32
 #SBATCH --mem-per-cpu=512M
 
 module purge
@@ -17,8 +17,8 @@ module load vtune
 
 problem_sizes=(1024 2048 4096)
 side_length=8192
-cpu_min_count=8
-cpu_max_count=8
+cpu_min_count=32
+cpu_max_count=32
 series_count=1
 theta=256
 iters=64
@@ -33,10 +33,11 @@ echo $csv_header > $output_file
 total_task=$(( "${#problem_sizes[@]}" * (cpu_max_count - cpu_min_count + 1) * series_count ))
 completed_task=0
 
+# vtune hpc-performance
 for (( n_cpu = $cpu_min_count ; n_cpu <= $cpu_max_count ; n_cpu++ )); do
   for problem_size in "${problem_sizes[@]}"; do
     for (( series_id = 0 ; series_id < $series_count ; series_id++ )); do
-      vtune_output_dir="${output_dir}/vtune/cpu_${n_cpu}_size_${problem_size}_sid_${series_id}"
+      vtune_output_dir="${output_dir}/vtune-hpc/cpu_${n_cpu}_size_${problem_size}_sid_${series_id}"
       mkdir -p $vtune_output_dir
       # echo "[$(date +%Y%m%dT%H%M%S)] Run: mpiexec -np $n_cpu ./main.py --series $series_id --side $side_length --theta $theta --iters 64 --grid-points $problem_size >> $output_file"
       mpiexec -np $n_cpu vtune -collect hpc-performance -trace-mpi -result-dir $vtune_output_dir -- ./main.py --series $series_id --side $side_length --theta $theta --iters 64 --grid-points $problem_size >> $output_file
@@ -46,18 +47,32 @@ for (( n_cpu = $cpu_min_count ; n_cpu <= $cpu_max_count ; n_cpu++ )); do
   done
 done
 
+# vtune hotspots
 for (( n_cpu = $cpu_min_count ; n_cpu <= $cpu_max_count ; n_cpu++ )); do
   for problem_size in "${problem_sizes[@]}"; do
     for (( series_id = 0 ; series_id < $series_count ; series_id++ )); do
-      aps_output_dir="${output_dir}/aps/cpu_${n_cpu}_size_${problem_size}_sid_${series_id}"
-      mkdir -p $aps_output_dir
+      vtune_output_dir="${output_dir}/vtune-hotspots/cpu_${n_cpu}_size_${problem_size}_sid_${series_id}"
+      mkdir -p $vtune_output_dir
       # echo "[$(date +%Y%m%dT%H%M%S)] Run: mpiexec -np $n_cpu ./main.py --series $series_id --side $side_length --theta $theta --iters 64 --grid-points $problem_size >> $output_file"
-      mpiexec -np $n_cpu aps --result-dir=$aps_output_dir -c=mpi ./main.py --series $series_id --side $side_length --theta $theta --iters 64 --grid-points $problem_size >> $output_file
+      mpiexec -np $n_cpu vtune -collect hotspots -trace-mpi -result-dir $vtune_output_dir -- ./main.py --series $series_id --side $side_length --theta $theta --iters 64 --grid-points $problem_size >> $output_file
       completed_task=$(( $completed_task + 1 ))
       echo "[$(date +%Y%m%dT%H%M%S)] Completion: $completed_task / $total_task"
     done
   done
 done
+
+# for (( n_cpu = $cpu_min_count ; n_cpu <= $cpu_max_count ; n_cpu++ )); do
+#   for problem_size in "${problem_sizes[@]}"; do
+#     for (( series_id = 0 ; series_id < $series_count ; series_id++ )); do
+#       aps_output_dir="${output_dir}/aps/cpu_${n_cpu}_size_${problem_size}_sid_${series_id}"
+#       mkdir -p $aps_output_dir
+#       # echo "[$(date +%Y%m%dT%H%M%S)] Run: mpiexec -np $n_cpu ./main.py --series $series_id --side $side_length --theta $theta --iters 64 --grid-points $problem_size >> $output_file"
+#       mpiexec -np $n_cpu aps --result-dir=$aps_output_dir -c=mpi ./main.py --series $series_id --side $side_length --theta $theta --iters 64 --grid-points $problem_size >> $output_file
+#       completed_task=$(( $completed_task + 1 ))
+#       echo "[$(date +%Y%m%dT%H%M%S)] Completion: $completed_task / $total_task"
+#     done
+#   done
+# done
 
 # zip -q "${output_file_base}.zip" $output_file
 # rm -f $output_file
