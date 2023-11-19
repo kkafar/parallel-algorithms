@@ -9,6 +9,7 @@
 
 module purge
 module load scipy-bundle/2021.10-intel-2021b
+module load vtune
 # module add .plgrid plgrid/tools/openmpi
 
 # I do not think we want the tasks to share resources
