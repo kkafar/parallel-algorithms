@@ -1,10 +1,10 @@
 #!/bin/bash -l
 #SBATCH --account=plgar2023-cpu
-#SBATCH --time=02:00:00
+#SBATCH --time=00:30:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --partition=plgrid
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=8
 #SBATCH --mem-per-cpu=512M
 
 module purge
@@ -46,7 +46,7 @@ for (( n_cpu = $cpu_min_count ; n_cpu <= $cpu_max_count ; n_cpu++ )); do
   done
 done
 
-zip -q "${output_file_base}.zip" $output_file
+# zip -q "${output_file_base}.zip" $output_file
 # rm -f $output_file
 
 # mpiexec ./main.py 10 13 255 30
