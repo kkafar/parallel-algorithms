@@ -17,9 +17,9 @@ module load vtune
 
 problem_sizes=(1024 2048 4096)
 side_length=8192
-cpu_min_count=1
-cpu_max_count=16
-series_count=5
+cpu_min_count=8
+cpu_max_count=8
+series_count=1
 theta=256
 iters=64
 csv_header="process_count,problem_size,series_id,time"
@@ -36,8 +36,10 @@ completed_task=0
 for (( n_cpu = $cpu_min_count ; n_cpu <= $cpu_max_count ; n_cpu++ )); do
   for problem_size in "${problem_sizes[@]}"; do
     for (( series_id = 0 ; series_id < $series_count ; series_id++ )); do
-      echo "[$(date +%Y%m%dT%H%M%S)] Run: mpiexec -np $n_cpu ./main.py --series $series_id --side $side_length --theta $theta --iters 64 --grid-points $problem_size >> $output_file"
-      mpiexec -np $n_cpu ./main.py --series $series_id --side $side_length --theta $theta --iters 64 --grid-points $problem_size >> $output_file
+      vtune_output_dir="${output_dir}/vtune/cpu_${n_cpu}_size_${problem_size}_sid_${series_id}"
+      mkdir -p $vtune_output_dir
+      # echo "[$(date +%Y%m%dT%H%M%S)] Run: mpiexec -np $n_cpu ./main.py --series $series_id --side $side_length --theta $theta --iters 64 --grid-points $problem_size >> $output_file"
+      mpiexec -np $n_cpu vtune -collect hpc-performance -trace-mpi -result-dir $vtune_output_dir -- ./main.py --series $series_id --side $side_length --theta $theta --iters 64 --grid-points $problem_size >> $output_file
       completed_task=$(( $completed_task + 1 ))
       echo "[$(date +%Y%m%dT%H%M%S)] Completion: $completed_task / $total_task"
     done
