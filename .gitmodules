@@ -1,0 +1,3 @@
+[submodule "parallel-algorithms-project"]
+	path = parallel-algorithms-project
+	url = git@github.com:kkafar/parallel-algorithms-project.git
